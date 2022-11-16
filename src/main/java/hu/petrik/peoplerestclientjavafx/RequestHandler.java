@@ -20,7 +20,7 @@ import java.net.URL;
             return getResponse(connection);
         }
 
-        public Response delete(String url) throws IOException {
+        public static Response delete(String url) throws IOException {
             HttpURLConnection connection = setupConnection(url);
             connection.setRequestMethod("DELETE");
             return getResponse(connection);

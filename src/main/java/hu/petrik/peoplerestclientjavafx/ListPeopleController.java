@@ -9,6 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class ListPeopleController {
 
@@ -64,5 +65,25 @@ public class ListPeopleController {
 
     @FXML
     public void deleteClick(ActionEvent actionEvent) {
+        int ItemIndex = peopleTable.getSelectionModel().getSelectedIndex();
+        if (ItemIndex == -1) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setHeaderText("Figyelmeztetés");
+            alert.setContentText("Törléshez előbb válasszon ki elemet");
+            alert.show();
+            return;
+        }
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("SURE?");
+        alert.setContentText("Biztos benne, hogy törli a kiválasztott személyt?");
+        alert.setHeaderText("MEGERŐSÍTÉS");
+        Optional<ButtonType> answer = alert.showAndWait();
+        if (answer.get().equals(ButtonType.OK)){
+            Person torlendoEmber = peopleTable.getSelectionModel().getSelectedItem();
+            String personToJson = String.format("{\"name\": \"%s\", \"email\": \"%s\", \"age\": \"%s\"}", torlendoEmber.getName(), torlendoEmber.getEmail(), torlendoEmber.getAge());
+            peopleTable.getItems().remove(torlendoEmber);
+            //TODO: törlés API-ból
+        }
+
     }
 }
