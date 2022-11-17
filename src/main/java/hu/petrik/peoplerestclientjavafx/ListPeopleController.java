@@ -65,25 +65,30 @@ public class ListPeopleController {
 
     @FXML
     public void deleteClick(ActionEvent actionEvent) {
-        int ItemIndex = peopleTable.getSelectionModel().getSelectedIndex();
-        if (ItemIndex == -1) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setHeaderText("Figyelmeztetés");
-            alert.setContentText("Törléshez előbb válasszon ki elemet");
+        int selectedIndex = peopleTable.getSelectionModel().getSelectedIndex();
+        if (selectedIndex == -1) {
+            Alert alert  = new Alert(Alert.AlertType.WARNING);
+            alert.setHeaderText("Please select a person from the list first");
             alert.show();
             return;
         }
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("SURE?");
-        alert.setContentText("Biztos benne, hogy törli a kiválasztott személyt?");
-        alert.setHeaderText("MEGERŐSÍTÉS");
-        Optional<ButtonType> answer = alert.showAndWait();
-        if (answer.get().equals(ButtonType.OK)){
-            Person torlendoEmber = peopleTable.getSelectionModel().getSelectedItem();
-            String personToJson = String.format("{\"name\": \"%s\", \"email\": \"%s\", \"age\": \"%s\"}", torlendoEmber.getName(), torlendoEmber.getEmail(), torlendoEmber.getAge());
-            peopleTable.getItems().remove(torlendoEmber);
-            //TODO: törlés API-ból
+        Person selected = peopleTable.getSelectionModel().getSelectedItem();
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setHeaderText(String.format("Are you sure you want to delete %s?",selected.getName()));
+        Optional<ButtonType> optionalButtonType = confirmation.showAndWait();
+        if (optionalButtonType.isEmpty()) {
+            System.out.println("Ismeretlen hiba történt");
         }
-
+        ButtonType clickedButton = optionalButtonType.get();
+        if (clickedButton.equals(ButtonType.OK)) {
+            String url = App.BASE_URL + "/" + selected.getId();
+            try {
+                RequestHandler.delete(url);
+                peopleTable.getItems().remove(selected);
+            } catch (IOException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("An error occured while communicating with the server");
+            }
+        }
     }
 }
