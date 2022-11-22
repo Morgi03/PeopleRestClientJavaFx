@@ -15,13 +15,13 @@ import java.io.IOException;
 
 public class UpdatePeopleController extends Controller {
     @FXML
-    private Button updateButton;
-    @FXML
-    private Spinner<Integer> ageField;
-    @FXML
     private TextField nameField;
     @FXML
     private TextField emailField;
+    @FXML
+    private Spinner<Integer> ageField;
+    @FXML
+    private Button updateButton;
 
     private Person person;
 
@@ -34,10 +34,10 @@ public class UpdatePeopleController extends Controller {
 
     @FXML
     private void initialize() {
-        SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 200, 30);
+        SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 200, 30);
         ageField.setValueFactory(valueFactory);
     }
-
 
     @FXML
     public void updateClick(ActionEvent actionEvent) {
@@ -60,7 +60,7 @@ public class UpdatePeopleController extends Controller {
         String json = converter.toJson(this.person);
         try {
             String url = App.BASE_URL + "/" + this.person.getId();
-            Response response = RequestHandler.put(App.BASE_URL, json);
+            Response response = RequestHandler.put(url, json);
             if (response.getResponseCode() == 200) {
                 Stage stage = (Stage) this.updateButton.getScene().getWindow();
                 stage.close();

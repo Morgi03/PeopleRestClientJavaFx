@@ -1,8 +1,6 @@
 package hu.petrik.peoplerestclientjavafx;
-
 import com.google.gson.Gson;
 import javafx.application.Platform;
-import javafx.beans.binding.StringExpression;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,9 +17,9 @@ public class ListPeopleController extends Controller {
     @FXML
     private Button insertButton;
     @FXML
-    private Button deleteButton;
-    @FXML
     private Button updateButton;
+    @FXML
+    private Button deleteButton;
     @FXML
     private TableView<Person> peopleTable;
     @FXML
@@ -33,7 +31,7 @@ public class ListPeopleController extends Controller {
 
     @FXML
     private void initialize() {
-        // Ha így írjuk be akkor getName() függvény eredményét írja ki.
+        // getName() függvény eredményét írja ki
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
         ageCol.setCellValueFactory(new PropertyValueFactory<>("age"));
@@ -41,9 +39,8 @@ public class ListPeopleController extends Controller {
             try {
                 loadPeopleFromServer();
             } catch (IOException e) {
-                error("Couldn't get data form the server",e.getMessage());
+                error("Couldn't get data from server", e.getMessage());
                 Platform.exit();
-
             }
         });
     }
@@ -72,39 +69,70 @@ public class ListPeopleController extends Controller {
             updateButton.setDisable(true);
             deleteButton.setDisable(true);
             stage.setOnCloseRequest(event -> {
+                insertButton.setDisable(false);
+                updateButton.setDisable(false);
+                deleteButton.setDisable(false);
                 try {
                     loadPeopleFromServer();
-                    insertButton.setDisable(false);
-                    updateButton.setDisable(false);
-                    deleteButton.setDisable(false);
                 } catch (IOException e) {
-                    error("An error occured while communicating with the server", e.getMessage());
+                    error("An error occurred while communicating with the server");
                 }
             });
         } catch (IOException e) {
-            error("Could not load from", e.getMessage());
+            error("Could not load form", e.getMessage());
         }
     }
 
     @FXML
     public void updateClick(ActionEvent actionEvent) {
+        int selectedIndex = peopleTable.getSelectionModel().getSelectedIndex();
+        if (selectedIndex == -1) {
+            warning("Please select a person from the list first");
+            return;
+        }
+        Person selected = peopleTable.getSelectionModel().getSelectedItem();
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("update-people-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 640, 480);
+            Stage stage = new Stage();
+            stage.setTitle("Update People");
+            stage.setScene(scene);
+            UpdatePeopleController controller = fxmlLoader.getController();
+            controller.setPerson(selected);
+            stage.show();
+            insertButton.setDisable(true);
+            updateButton.setDisable(true);
+            deleteButton.setDisable(true);
+            stage.setOnHidden(event -> {
+                insertButton.setDisable(false);
+                updateButton.setDisable(false);
+                deleteButton.setDisable(false);
+                try {
+                    loadPeopleFromServer();
+                } catch (IOException e) {
+                    error("An error occurred while communicating with the server");
+                }
+            });
+        } catch (IOException e) {
+            error("Could not load form", e.getMessage());
+        }
     }
 
     @FXML
     public void deleteClick(ActionEvent actionEvent) {
         int selectedIndex = peopleTable.getSelectionModel().getSelectedIndex();
         if (selectedIndex == -1) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setHeaderText("Please select a person from the list first");
-            alert.show();
+            warning("Please select a person from the list first");
             return;
         }
+
         Person selected = peopleTable.getSelectionModel().getSelectedItem();
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setHeaderText(String.format("Are you sure you want to delete %s?", selected.getName()));
         Optional<ButtonType> optionalButtonType = confirmation.showAndWait();
         if (optionalButtonType.isEmpty()) {
-            System.err.println("Unknown error occured");
+            System.err.println("Unknown error occurred");
+            return;
         }
         ButtonType clickedButton = optionalButtonType.get();
         if (clickedButton.equals(ButtonType.OK)) {
@@ -113,9 +141,8 @@ public class ListPeopleController extends Controller {
                 RequestHandler.delete(url);
                 loadPeopleFromServer();
             } catch (IOException e) {
-                error("An error occured while communicating with the server", e.getMessage());
+                error("An error occurred while communicating with the server");
             }
         }
     }
-
 }
