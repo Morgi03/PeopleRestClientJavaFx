@@ -12,6 +12,8 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class UpdatePeopleController extends Controller {
     @FXML
@@ -24,6 +26,15 @@ public class UpdatePeopleController extends Controller {
     private Button updateButton;
 
     private Person person;
+
+    // email validation
+    public static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
+    public static boolean emailValidate(String emailStr) {
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
+        return matcher.find();
+    }
+    // email validation
 
     public void setPerson(Person person) {
         this.person = person;
@@ -52,7 +63,10 @@ public class UpdatePeopleController extends Controller {
             warning("Email is required");
             return;
         }
-        // TODO: validate email format
+        if (!emailValidate(email)) {
+            warning("Email format is not valid");
+            return;
+        }
         this.person.setName(name);
         this.person.setEmail(email);
         this.person.setAge(age);
@@ -72,5 +86,4 @@ public class UpdatePeopleController extends Controller {
             e.printStackTrace();
         }
     }
-
 }

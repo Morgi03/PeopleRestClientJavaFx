@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CreatePeopleController extends Controller {
     @FXML
@@ -17,6 +19,16 @@ public class CreatePeopleController extends Controller {
     private TextField nameField;
     @FXML
     private TextField emailField;
+
+    // email validation
+    public static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
+    public static boolean emailValidate(String emailStr) {
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
+        return matcher.find();
+    }
+    // email validation
+
 
     @FXML
     private void initialize() {
@@ -38,12 +50,15 @@ public class CreatePeopleController extends Controller {
             warning("Email is required");
             return;
         }
-        // TODO: validate email format
+        if (!emailValidate(email)) {
+            warning("Email format is not valid");
+            return;
+        }
         Person newPerson = new Person(0, name, email, age);
         Gson converter = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
         String json = converter.toJson(newPerson);
         try {
-            Response response =  RequestHandler.post(App.BASE_URL, json);
+            Response response = RequestHandler.post(App.BASE_URL, json);
             if (response.getResponseCode() == 201) {
                 warning("Person added!");
                 nameField.setText("");
